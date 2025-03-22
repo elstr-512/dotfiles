@@ -1,0 +1,141 @@
+# Ghostty shell integration. This should be at the top!
+#if [ -n "${GHOSTTY_RESOURCES_DIR}" ]; then
+#    builtin source "${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration"
+#fi
+
+### ~~~~ ~~~~ ~~~~ ~~~~  Prompt ~~~~ ~~~~ ~~~~ ~~~~
+
+fpath+=($HOME/dotfiles/zsh/pure)
+autoload -Uz promptinit
+promptinit
+
+prompt pure
+
+
+### ~~~~ ~~~~ ~~~~ ~~~~  Keybindings ~~~~ ~~~~ ~~~~ ~~~~
+
+bindkey -e                                        # emacs key bindings
+bindkey '^[[1;5C' forward-word                    # ctrl + ->
+bindkey '^[[1;5D' backward-word                   # ctrl + <-
+
+
+### ~~~~ ~~~~ ~~~~ ~~~~ Completion features ~~~~ ~~~~ ~~~~ ~~~~
+
+# links: https://wiki.zshell.dev/docs/guides/customization
+autoload -Uz compinit
+compinit -d ~/.cache/zcompdump
+zstyle ':completion:*:*:*:*:*' menu select
+zstyle ':completion:*' completer _expand _complete
+zstyle ':completion:*' list-colors ''
+zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
+zstyle ':completion:*:matches' group 'yes'
+zstyle ':completion:*:options' description 'yes'
+zstyle ':completion:*:options' auto-description '%d'
+zstyle ':completion:*:corrections' format ' %F{green}-- %d (errors: %e) --%f'
+zstyle ':completion:*:descriptions' format ' %F{yellow}-- %d --%f'
+zstyle ':completion:*:messages' format ' %F{purple} -- %d --%f'
+zstyle ':completion:*:warnings' format ' %F{red}-- no matches found --%f'
+zstyle ':completion:*' format ' %F{yellow}-- %d --%f'
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' verbose true
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*:functions' ignored-patterns '(_*|pre(cmd|exec))'
+zstyle ':completion:*' use-cache true
+zstyle ':completion:*' rehash true
+zstyle ':completion:*:default' list-prompt '%S%M matches%s' # or / zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
+# zstyle ':completion:*' use-compctl false # idk
+# zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd' # more processes
+
+# completion feature to execute (x) files like bash
+bindkey '^I' dotcomplete
+zle -N dotcomplete
+function dotcomplete() {
+  if [[ $BUFFER =~ ^'\.'$ ]]; then
+    BUFFER='./'
+    CURSOR=2
+    zle list-choices
+  else
+    zle expand-or-complete
+  fi
+}
+zstyle ':completion:*' special-dirs true
+
+
+### ~~~~ ~~~~ ~~~~ ~~~~ History ~~~~ ~~~~ ~~~~ ~~~~
+
+HISTFILE=~/.zsh_history
+HISTSIZE=100000
+SAVEHIST=100000
+
+setopt hist_ignore_space  # Don't save when prefixed with space
+setopt hist_ignore_dups   # Don't save duplicate lines
+setopt share_history      # Share history between sessions
+setopt inc_append_history # New history lines are added to the $HISTFILE incrementally (as soon as they are entered), rather than waiting until the  shell exits.
+setopt hist_verify        # show command with history expansion to user before running it
+
+
+### ~~~~ ~~~~ ~~~~ ~~~~ Color support ~~~~ ~~~~ ~~~~ ~~~~
+
+if [ -x /usr/bin/dircolors ]; then # enable color support of ls, less and man, and also add handy aliases
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    export LS_COLORS="$LS_COLORS:ow=30;44:" # fix ls color for folders with 777 permissions
+
+    alias ls='ls --color=auto -F'
+    alias dir='dir --color=auto'
+    alias vdir='vdir --color=auto'
+
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+    alias diff='diff --color=auto'
+    alias ip='ip --color=auto'
+
+    export LESS_TERMCAP_mb=$'\E[1;31m'     # begin blink
+    export LESS_TERMCAP_md=$'\E[1;36m'     # begin bold
+    export LESS_TERMCAP_me=$'\E[0m'        # reset bold/blink
+    export LESS_TERMCAP_so=$'\E[01;33m'    # begin reverse video
+    export LESS_TERMCAP_se=$'\E[0m'        # reset reverse video
+    export LESS_TERMCAP_us=$'\E[1;32m'     # begin underline
+    export LESS_TERMCAP_ue=$'\E[0m'        # reset underline
+
+    # Take advantage of $LS_COLORS for completion as well
+    zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+    zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+fi
+
+
+### ~~~~ ~~~~ ~~~~ ~~~~ Aliases ~~~~ ~~~~ ~~~~ ~~~~
+
+alias l='ls'
+alias l.='ls -d .*'
+alias ll.='ls -dl .*'
+alias ll='ls -l'
+alias la='ls -la'
+
+# file operation utils
+alias mv='nocorrect mv -v'
+alias cp='nocorrect cp -vr'
+alias mkdir='nocorrect mkdir -vp'
+
+# tmux util scripts
+if [ -f "$HOME/dotfiles/utils/scripts/simple_tmux_sesh.sh" ] ; then
+  alias ttmux='~/dotfiles/utils/scripts/simple_tmux_sesh.sh'
+fi
+
+alias e='nvim'
+alias lg='lazygit'
+
+
+### ~~~~ ~~~~ ~~~~ ~~~~ Path configuration ~~~~ ~~~~ ~~~~ ~~~~
+
+path=(
+    $path              # Keep existing PATH entries
+    $HOME/.local/bin
+)
+
+# Remove duplicate entries and non-existent directories
+typeset -U path
+path=($^path(N-/))
+
+export PATH
+
