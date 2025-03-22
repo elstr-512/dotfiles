@@ -90,8 +90,101 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+-- ~~~~~~~~~~~~~~~~ [[ My options [ee] start ]] ~~~~~~~~~~~~~~~~ --
+-- go to previous/next line with h,l,left arrow and right arrow
+--
+-- when cursor reaches end/beginning of line
+vim.opt.whichwrap:append '<,>,[,],h,l'
+
+-- Define a variable to track the current theme state
+local is_dark = true
+
+-- Toggle color scheme function
+function ToggleColorScheme()
+  if is_dark then
+    vim.cmd 'colorscheme rose-pine-dawn' -- light theme
+  else
+    vim.cmd 'colorscheme rose-pine-main' -- dark theme
+  end
+  -- Toggle the theme state
+  is_dark = not is_dark
+end
+-- Set up the keybinding
+vim.keymap.set('n', '<leader>tc', ToggleColorScheme, { desc = 'Toggle color scheme' })
+
+local is_auto_complete = true
+
+function ToggleAutoComplete()
+  if is_auto_complete then
+    vim.cmd 'lua require("cmp").setup { enabled = false}'
+  else
+    vim.cmd 'lua require("cmp").setup { enabled = true}'
+  end
+  -- Toggle the theme state
+  is_auto_complete = not is_auto_complete
+end
+vim.keymap.set('n', '<leader>tp', ToggleAutoComplete, { desc = 'Toggle completion' })
+
+--  nordic keyboard stuff
+vim.keymap.set('n', 'ø', ':')
+vim.keymap.set('n', '-', '/')
+
+-- Search, keep cursor in middle while moving
+vim.keymap.set('n', 'n', 'nzzzv')
+vim.keymap.set('n', 'N', 'Nzzzv')
+
+-- nvimtree
+-- vim.keymap.set('n', '\\', '<cmd>NvimTreeToggle<CR>', { desc = 'nvimtree toggle window' })
+
+-- Move lines up and down
+vim.keymap.set('n', '<A-k>', ':m .-2<CR>==') -- move line up
+vim.keymap.set('n', '<A-j>', ':m .+1<CR>==') -- move line down
+
+vim.keymap.set('n', '<A-Up>', ':m .-2<CR>==') -- move line up
+vim.keymap.set('n', '<A-Down>', ':m .+1<CR>==') -- move line down
+
+vim.keymap.set('v', '<A-k>', ":m '<-2<CR>gv=gv") -- move block up
+vim.keymap.set('v', '<A-j>', ":m '>+1<CR>gv=gv") -- move block down
+
+vim.keymap.set('v', '<A-Up>', ":m '<-2<CR>gv=gv") -- move block up
+vim.keymap.set('v', '<A-Down>', ":m '>+1<CR>gv=gv") -- move block down
+
+vim.keymap.set('n', 'Q', '<nop>')
+
+vim.keymap.set('n', '<leader>rt', [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = 'Vim: [R]ename [t]his word' })
+
+-- From vim defaults.vim
+-- When editing a file, always jump to the last known cursor position.
+-- Don't do it when the position is invalid, when inside an event handler
+-- (happens when dropping a file on gvim) and for a commit message (it's
+-- likely a different one than last time).
+vim.api.nvim_create_autocmd('BufReadPost', {
+  group = vim.g.event,
+  callback = function(args)
+    local valid_line = vim.fn.line [['"]] >= 1 and vim.fn.line [['"]] < vim.fn.line '$'
+    local not_commit = vim.b[args.buf].filetype ~= 'commit'
+
+    if valid_line and not_commit then
+      vim.cmd [[normal! g`"]]
+    end
+  end,
+})
+
+-- Indenting
+-- https://gist.github.com/LunarLambda/4c444238fb364509b72cfb891979f1dd
+-- Spaces Only; Where N is your desired indentation size:
+vim.opt.expandtab = true
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.softtabstop = -1
+vim.optsmarttab = true
+
+vim.opt.smartindent = true
+
+-- ~~~~~~~~~~~~~~~~ [[ My options [ee] end ]] ~~~~~~~~~~~~~~~~ --
+
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -102,7 +195,7 @@ vim.g.have_nerd_font = false
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -664,6 +757,7 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         -- clangd = {},
+        asm_lsp = {},
         -- gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
@@ -711,6 +805,7 @@ require('lazy').setup({
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
+      ---@diagnostic disable-next-line: missing-fields
       require('mason-lspconfig').setup {
         ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
         automatic_installation = false,
@@ -748,7 +843,7 @@ require('lazy').setup({
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        local disable_filetypes = { c = true, cpp = true, cu = true }
         local lsp_format_opt
         if disable_filetypes[vim.bo[bufnr].filetype] then
           lsp_format_opt = 'never'
@@ -843,9 +938,9 @@ require('lazy').setup({
 
           -- If you prefer more traditional completion keymaps,
           -- you can uncomment the following lines
-          --['<CR>'] = cmp.mapping.confirm { select = true },
-          --['<Tab>'] = cmp.mapping.select_next_item(),
-          --['<S-Tab>'] = cmp.mapping.select_prev_item(),
+          ['<CR>'] = cmp.mapping.confirm { select = true },
+          ['<Tab>'] = cmp.mapping.select_next_item(),
+          ['<S-Tab>'] = cmp.mapping.select_prev_item(),
 
           -- Manually trigger a completion from nvim-cmp.
           --  Generally you don't need this, because nvim-cmp will display
@@ -894,6 +989,8 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+
+    --[[
     'folke/tokyonight.nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
@@ -908,6 +1005,15 @@ require('lazy').setup({
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.cmd.colorscheme 'tokyonight-night'
+    end,
+    --]]
+
+    'rose-pine/neovim',
+    name = 'rose-pine',
+    priority = 1000, -- Make sure to load this before all the other start plugins.
+    config = function()
+      vim.cmd 'colorscheme rose-pine-main'
+      -- vim.cmd 'colorscheme rose-pine-dawn'
     end,
   },
 
@@ -986,10 +1092,10 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.debug',
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
@@ -997,7 +1103,7 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
