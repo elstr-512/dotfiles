@@ -28,6 +28,14 @@ return {
       view_options = {
         show_hidden = true,
       },
+
+      keymaps = {
+        -- disable keys controling splits
+        ['<C-s>'] = false, -- "vertical"
+        ['<C-h>'] = false, -- "horizontal"
+        ['<C-t>'] = false, -- "tab"
+        ['<C-l>'] = false, -- "refresh"
+      },
     },
     -- Optional dependencies
     dependencies = { { 'echasnovski/mini.icons', opts = {} } },
