@@ -1,7 +1,7 @@
 # Ghostty shell integration. This should be at the top!
-#if [ -n "${GHOSTTY_RESOURCES_DIR}" ]; then
-#    builtin source "${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration"
-#fi
+if [ -n "${GHOSTTY_RESOURCES_DIR}" ]; then
+   builtin source "${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration"
+fi
 
 ### ~~~~ ~~~~ ~~~~ ~~~~  Prompt ~~~~ ~~~~ ~~~~ ~~~~
 
@@ -139,3 +139,5 @@ path=($^path(N-/))
 
 export PATH
 
+export EDITOR="/usr/bin/nvim"
+export VISUAL="/usr/bin/nvim"
