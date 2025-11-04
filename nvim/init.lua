@@ -756,8 +756,8 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
-        asm_lsp = {},
+        clangd = {},
+        -- asm_lsp = {},
         -- gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
@@ -1012,8 +1012,8 @@ require('lazy').setup({
     name = 'rose-pine',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
-      vim.cmd 'colorscheme rose-pine-main'
-      -- vim.cmd 'colorscheme rose-pine-dawn'
+      -- vim.cmd 'colorscheme rose-pine-main'
+      vim.cmd 'colorscheme rose-pine-dawn'
     end,
   },
 
@@ -1063,7 +1063,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'nix' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
