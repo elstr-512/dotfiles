@@ -61,7 +61,8 @@ window-theme = ghostty
 
 unfocused-split-opacity = 0.5
 
-theme = rose-pine-moon
+# theme = rose-pine-moon
+theme = rose-pine-dawn
 # theme = Nocturnal Winter
 # theme = iTerm2 Solarized Light
 # theme = light:rose-pine-dawn,dark:rose-pine
